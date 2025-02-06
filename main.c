@@ -36,41 +36,63 @@ void insert_db(MYSQL *connection){
     printf("\nSucess! Product registered.\n");
 }
 
+int exist_ID(MYSQL *connection, int id_product) {
+    char query[500];
+    snprintf(query, sizeof(query), "SELECT COUNT(*) FROM Products WHERE id_Product = %d", id_product);
+    
+    if (mysql_query(connection, query)) {
+        printf("Error: %s\n", mysql_error(connection));
+        return -1;  
+    }
+    MYSQL_RES *res = mysql_store_result(connection);
+    if (!res)
+        return -1;  
+
+    MYSQL_ROW row = mysql_fetch_row(res);
+    int exists = 0;
+    if (row && row[0])
+        exists = atoi(row[0]) > 0 ? 1 : 0;
+
+    mysql_free_result(res);
+    return exists;
+}
+
 void general_update(MYSQL *connection, int id_product, const char *command, float number, char value[100],int integer, int current_case){
     char query[500];
-    // If float, sale_price or purchase_price:
-    if(current_case == 1){
-        snprintf(query, sizeof(query), 
-        "UPDATE Products SET %s= %f WHERE id_Product = %d ", command, number, id_product);
-        if (mysql_query(connection, query)) {
-            printf("\nProduct not update\n");
-            return;
+    if(exist_ID(connection, id_product)){
+        // If float, sale_price or purchase_price:
+        if(current_case == 1){
+            snprintf(query, sizeof(query), 
+            "UPDATE Products SET %s= %f WHERE id_Product = %d ", command, number, id_product);
+            if (mysql_query(connection, query)) {
+                printf("\nProduct not update\n");
+                return;
+            }
+            printf("\nSucess! Product %s update\n", command);   
         }
-        printf("\nSucess! Product %s update\n", command);   
-    }
-    // If string, name or brand:
-    else if(current_case == 2){
-        snprintf(query, sizeof(query), 
-        "UPDATE Products SET %s= '%s' WHERE id_Product = %d ",command, value, id_product);
-        if (mysql_query(connection, query)) {
-            printf("Product not update");
-            return;
+        // If string, name or brand:
+        else if(current_case == 2){
+            snprintf(query, sizeof(query), 
+            "UPDATE Products SET %s= '%s' WHERE id_Product = %d ",command, value, id_product);
+            if (mysql_query(connection, query)) {
+                printf("Product not update");
+                return;
+            }
+            printf("\nSucess! Product %s update\n", command);    
         }
-        printf("\nSucess! Product %s update\n", command);    
-    }
-    // If int, quantity:
-    else if(current_case == 3){
-        snprintf(query, sizeof(query), 
-        "UPDATE Products SET %s= %d WHERE id_Product = %d ",command, integer, id_product);
-        if (mysql_query(connection, query)) {
-            printf("Product not update");
-            return;
+        // If int, quantity:
+        else if(current_case == 3){
+            snprintf(query, sizeof(query), 
+            "UPDATE Products SET %s= %d WHERE id_Product = %d ",command, integer, id_product);
+            if (mysql_query(connection, query)) {
+                printf("Product not update");
+                return;
+            }
+            printf("\nSucess! Product %s update\n", command);    
         }
-        printf("\nSucess! Product %s update\n", command);    
     }
-    else{
-        printf("Error! Product not update");
-    }
+    else
+        printf("The product ID doesn't exist\n");
 }
 
 void update_db(MYSQL *connection){
@@ -252,22 +274,22 @@ void read_db(MYSQL *connection){
 
 void delete_db(MYSQL *connection){
     int id_product;
-
     printf("\nLet's delete a product!\nAttention: You need to know the product ID\n\n");
     printf("\nInsert product ID:\n");
     scanf("%d", &id_product);
 
-    char query[500];
-    snprintf(query, sizeof(query), "DELETE FROM Products WHERE id_Product= %d", id_product);
-    if (mysql_query(connection, query)) {
-        printf("Error deleting product: %s\n", mysql_error(connection));
-        return;
-    }
-    if (mysql_affected_rows(connection) > 0)
+    if(exist_ID(connection, id_product)){
+        char query[500];
+        snprintf(query, sizeof(query), "DELETE FROM Products WHERE id_Product= %d", id_product);
+        if (mysql_query(connection, query)) {
+            printf("Error deleting product: %s\n", mysql_error(connection));
+            return;
+        }
+        
         printf("Success! Product deleted\n");
+    }
     else
-        printf("No product found with ID %d\n", id_product);
-
+        printf("The product ID doesn't exist\n\n");
 }
 
 void update_qnt_stock(MYSQL *connection, int id_product, int quantity){
