@@ -292,7 +292,108 @@ void delete_db(MYSQL *connection){
         printf("The product ID doesn't exist\n\n");
 }
 
-void update_qnt_stock(MYSQL *connection, int id_product, int quantity){
+void find_name(MYSQL *connection, int id_product) {
+    char query[500];
+    MYSQL_RES *res;
+    MYSQL_ROW row;
+
+    snprintf(query, sizeof(query), "SELECT name FROM Products WHERE id_Product = %d", id_product);
+    execute_query(connection, query);
+
+    res = mysql_store_result(connection);
+    if (!res) {
+        printf("Erro ao obter resultado da consulta\n");
+        return;
+    }
+
+    row = mysql_fetch_row(res);
+    if (row && row[0]) {  // Verifica se há resultado válido
+        printf("%-*s", 25, row[0]);
+    } else {
+        printf("Produto não encontrado\n");
+    }
+
+    mysql_free_result(res);  // Libera a memória do resultado
+}
+
+
+void find_quant(MYSQL *connection, int quant, int id_product, float *total) {
+    char query[500];
+    MYSQL_RES *res;
+    MYSQL_ROW row;
+
+    snprintf(query, sizeof(query), "SELECT sale_price FROM Products WHERE id_Product = %d", id_product);
+    execute_query(connection, query);
+
+    res = mysql_store_result(connection);
+    if (!res) {
+        printf("Erro ao obter resultado\n");
+        return;
+    }
+
+    printf("%-*d", 25, quant);
+    row = mysql_fetch_row(res);
+    if (row && row[0]) {
+        float price = atof(row[0]);  // Converte o valor para float
+        *total += (price * quant);  // Atualiza o total
+        printf("%-*.*f", 25, 2, price);
+        printf("%-*.*f", 25, 2, (price * quant));
+
+    } else {
+        printf("Produto não encontrado ou sem preço\n");
+    }
+
+    mysql_free_result(res);
+}
+
+
+void report(MYSQL *connection, int sale_id) {
+    char query[500];
+    MYSQL_RES *res;
+    MYSQL_ROW row;
+
+    snprintf(query, sizeof(query), 
+             "SELECT id_Product_aux, quantity FROM Sale_products WHERE id_Sale_aux = %d", sale_id);
+    execute_query(connection, query);
+
+    res = mysql_store_result(connection);
+    if (!res) {
+        printf("Erro ao obter resultado da consulta\n");
+        return;
+    }
+
+    int num_rows = mysql_num_rows(res);
+    if (num_rows == 0) {
+        printf("Nenhum produto encontrado para esta venda\n");
+        mysql_free_result(res);
+        return;
+    }
+
+    float total = 0.00;
+    printf(" ----------------------------------------------------------\n\n ");
+
+    printf("%-25s", "Product Name");
+    printf("%-25s", "Quantity");
+    printf("%-25s", "Unite price");
+    printf("%-25s\n", "Total");
+
+    while ((row = mysql_fetch_row(res))) {
+        if (row[0] && row[1]) {  // Verifica se os valores não são NULL
+            int id_product = atoi(row[0]);
+            int quant = atoi(row[1]);
+            find_name(connection, id_product);  // Supõe-se que esta função existe
+            find_quant(connection, quant, id_product, &total);
+        }
+        printf("\n");
+    }
+
+    printf("\n \t\tTotal da venda: %.2f \n", total);
+    mysql_free_result(res);
+    printf(" ----------------------------------------------------------\n");
+}
+
+
+int update_qnt_stock(MYSQL *connection, int id_product, int quantity){
     MYSQL_ROW row;
     MYSQL_RES *res;
     char query[500];
@@ -302,7 +403,7 @@ void update_qnt_stock(MYSQL *connection, int id_product, int quantity){
     snprintf(query, sizeof(query), "SELECT Products.quantity FROM Products WHERE Products.id_Product = %d", id_product);
     if (mysql_query(connection, query)) {
         printf("\nFailure in selection\n");
-        return;
+        return -1;
     }
 
     res = mysql_store_result(connection);
@@ -313,61 +414,92 @@ void update_qnt_stock(MYSQL *connection, int id_product, int quantity){
     }
     mysql_free_result(res);
     if(new_quant < 0){
-        printf("No is possible registered sale, pois nao ha quantity suficiente de product in stock");
-        return;
+        printf("\nNo is possible registered sale, pois nao ha quantity suficiente de product in stock \n");
+        return 0;
     }
     snprintf(query, sizeof(query), 
     "UPDATE Products SET quantity= %d WHERE id_Product = %d ", new_quant, id_product);
     if (mysql_query(connection, query)) {
         printf("\nProduct not update\n");
-        return;
+        return -1;
     }
-    else if(new_quant == 0)
-        printf("there aren't this type the product in stock");
+    else if(new_quant == 0){
+        printf("\nthere aren't this type the product in stock\n");
+        return 1;
+    }
+    return 1;
+    
 }
+
 void sale_db(MYSQL *connection){
     char query[500];
-    int venda_id;
+    int sale_id;
     int id_product;
     int quantity;
     int count = 1;
     printf("\nLet's a new sale!\n\n");
     mysql_query(connection, "INSERT INTO Sale () VALUES ()");
-    venda_id = mysql_insert_id(connection);
-    printf("Nova venda criada com ID: %d\n", venda_id);
+    sale_id = mysql_insert_id(connection);
+    printf("Nova sale criada com ID: %d\n", sale_id);
 
     while(1){
         printf("Type the ID of the %dº product or type 0 if there are no more products to be registered \n", count);
         scanf("%d", &id_product);
-        if(id_product == 0 && count == 1)
-            return;
-        else if(id_product == 0 && count != 1){
-            printf("\nSucess! Sale registered\n");
-            return;
+        if(exist_ID(connection, id_product) || id_product == 0){
+            if(id_product == 0 ){
+                char query[500];
+                snprintf(query, sizeof(query), "SELECT COUNT(*) FROM Sale_products WHERE id_Sale_aux = %d", sale_id);
+                execute_query(connection, query);
+
+                MYSQL_RES *res = mysql_store_result(connection);
+                if (!res)
+                    return;  
+            
+                MYSQL_ROW row = mysql_fetch_row(res);
+                int exists = 0;
+                if (row && row[0])
+                    exists = atoi(row[0]) > 0 ? 1 : 0;
+            
+                mysql_free_result(res);
+                if(!exists){
+                    snprintf(query, sizeof(query), "DELETE FROM Sale WHERE id_Sale= %d", sale_id);
+                    if (mysql_query(connection, query)) {
+                        printf("Error deleting product: %s\n", mysql_error(connection));
+                        return;
+                    }
+                    
+                    printf("venda nao efetuada\n");
+                }
+                else{
+                    printf("\nSucess! Sale registered\n");
+                    report(connection, sale_id);
+                }
+                return;
+            }  
+            else{
+                printf("Type the quantity of the %dº product \n", count);
+                scanf("%d", &quantity);
+
+                if(update_qnt_stock(connection, id_product, quantity)){
+                    snprintf(query, sizeof(query), 
+                    "INSERT INTO Sale_products(id_Sale_aux, id_Product_aux, quantity) VALUES (%d, %d, %d)", 
+                    sale_id, id_product, quantity);
+
+                    if (mysql_query(connection, query)) {
+                        printf("\nSale not registered %s\n",mysql_error(connection));
+                        return;
+                    }
+                    count++;
+                }
+            }
         }
         else{
-            printf("Type the quantity of the %dº product \n", count);
-            scanf("%d", &quantity);
-
-            snprintf(query, sizeof(query), 
-            "INSERT INTO Sale_products(id_Sale_aux, id_Product_aux, quantity) VALUES (%d, %d, %d)", 
-            venda_id, id_product, quantity);
-
-            if (mysql_query(connection, query)) {
-                printf("\nSale not registered %s\n",mysql_error(connection));
-                return;
-            }
-            count++;
-            //update the quantity of products in stock
-            update_qnt_stock(connection, id_product, quantity);
-           
+            printf("Product ID not found\n\n");
         }
     }       
 }
 
-void report(MYSQL *connection){
 
-}
 
 
 
@@ -378,7 +510,7 @@ int main(){
     int comando;
 
     while (proceed){
-        printf(" ----------------------------- YOUR STORE -----------------------------\n ");
+        printf(" ----------------------------- STORE_MANAGER -----------------------------\n ");
         printf("\n  [1] - Register a new product");
         printf("\n  [2] - Update a product");
         printf("\n  [3] - Find product");
@@ -410,7 +542,6 @@ int main(){
 
             case 0 :
                 proceed =0;
-                report(connection);
                 break;
             
             default :
