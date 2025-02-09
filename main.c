@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <mysql/mysql.h>
+#include <time.h>
 #include "config_db.h"
 #include "send_message.h"
 
@@ -308,7 +309,7 @@ void find_name(MYSQL *connection, int id_product) {
 
     row = mysql_fetch_row(res);
     if (row && row[0]) {  // Verifica se há resultado válido
-        printf("%-*s", 25, row[0]);
+        printf("%-10s %-*s"," ", 20, row[0]);
     } else {
         printf("Produto não encontrado\n");
     }
@@ -331,13 +332,13 @@ void find_quant(MYSQL *connection, int quant, int id_product, float *total) {
         return;
     }
 
-    printf("%-*d", 25, quant);
+    printf("%-*d", 20, quant);
     row = mysql_fetch_row(res);
     if (row && row[0]) {
         float price = atof(row[0]);  // Converte o valor para float
         *total += (price * quant);  // Atualiza o total
-        printf("%-*.*f", 25, 2, price);
-        printf("%-*.*f", 25, 2, (price * quant));
+        printf("%-*.*f", 20, 2, price);
+        printf("%-*.*f", 20, 2, (price * quant));
 
     } else {
         printf("Produto não encontrado ou sem preço\n");
@@ -370,12 +371,17 @@ void report(MYSQL *connection, int sale_id) {
     }
 
     float total = 0.00;
-    printf(" ----------------------------------------------------------\n\n ");
 
-    printf("%-25s", "Product Name");
-    printf("%-25s", "Quantity");
-    printf("%-25s", "Unite price");
-    printf("%-25s\n", "Total");
+
+   
+    printf("%75s\n", "----------------------------------------------------------------");
+    
+    // Título centralizado
+    printf("%55s\n\n", "RECEIPT STORE MANAGER");
+
+    // Cabeçalho da tabela de produtos
+    printf("%-10s %-20s%-20s%-20s%-20s\n", " ", "Product Name", "Quantity", "Unit Price", "Total");
+
 
     while ((row = mysql_fetch_row(res))) {
         if (row[0] && row[1]) {  // Verifica se os valores não são NULL
@@ -386,10 +392,31 @@ void report(MYSQL *connection, int sale_id) {
         }
         printf("\n");
     }
-
-    printf("\n \t\tTotal da venda: %.2f \n", total);
+    printf("\n %68s %-10.2f\n", "The total:", total);
     mysql_free_result(res);
-    printf(" ----------------------------------------------------------\n");
+
+    time_t current_time;
+    struct tm *tm_info;
+    time(&current_time);
+    tm_info = localtime(&current_time);
+    // Formata e imprime a data e a hora
+    // Imprime a data e a hora com alinhamento correto
+    printf("\n%65s %02d/%02d/%04d", "Date:",
+        tm_info->tm_mday,     // Dia
+        tm_info->tm_mon + 1,  // Mês (base 0, por isso soma 1)
+        tm_info->tm_year + 1900);
+
+ printf("\n%65s %02d:%02d:%02d\n", "Time:",
+        tm_info->tm_hour,     // Hora
+        tm_info->tm_min,      // Minuto
+        tm_info->tm_sec);
+
+ // Linha inferior da nota fiscal
+ printf("%75s\n\n", "----------------------------------------------------------------");
+
+
+
+
 }
 
 
