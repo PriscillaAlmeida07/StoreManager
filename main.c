@@ -6,12 +6,13 @@
 #include "config_db.h"
 #include "send_message.h"
 
+
 void insert_db(MYSQL *connection){
     printf("\nLet's register a new product!\n\n");
     char name[100];
+    float purchase_price;
     float sale_price;
     char brand[100];
-    float purchase_price;
     int quantity;
 
     printf("Type the product name: \n");
@@ -93,7 +94,7 @@ void general_update(MYSQL *connection, int id_product, const char *command, floa
         }
     }
     else
-        printf("The product ID doesn't exist\n");
+        printf("The product ID doesn't exist!\n");
 }
 
 void update_db(MYSQL *connection){
@@ -310,13 +311,11 @@ void find_name(MYSQL *connection, int id_product) {
     row = mysql_fetch_row(res);
     if (row && row[0])
         printf("%-10s %-*s"," ", 20, row[0]);
-
     else 
         printf("Product not found!\n");
 
     mysql_free_result(res);  
 }
-
 
 void find_quant(MYSQL *connection, int quant, int id_product, float *total) {
     char query[500];
@@ -339,11 +338,9 @@ void find_quant(MYSQL *connection, int quant, int id_product, float *total) {
         *total += (price * quant);  
         printf("%-*.*f", 20, 2, price);
         printf("%-*.*f", 20, 2, (price * quant));
-
     } 
     else 
         printf("Product not found!\n");
-
     mysql_free_result(res);
 }
 
@@ -371,11 +368,8 @@ void receipt(MYSQL *connection, int sale_id) {
 
     float total = 0.00;
     printf("%75s\n", "----------------------------------------------------------------");
-
     printf("%55s\n\n", "STORE MANAGER RECEIPT");
-
     printf("%-10s %-20s%-20s%-20s%-20s\n", " ", "Product Name", "Quantity", "Unit Price", "Total");
-
 
     while ((row = mysql_fetch_row(res))) {
         if (row[0] && row[1]) {  
@@ -438,7 +432,7 @@ int update_qnt_stock(MYSQL *connection, int id_product, int quantity){
         return -1;
     }
     else if(new_quant == 0){
-        printf("\nthere aren't this type the product in stock\n");
+        printf("\nWith this sale, this product is out of stock!\n");
         return 1;
     }
     return 1;
@@ -456,7 +450,7 @@ void sale_db(MYSQL *connection){
     sale_id = mysql_insert_id(connection);
 
     while(1){
-        printf("Type the ID of the %dº product or type 0 if there are no more products to be registered \n", count);
+        printf("Type the ID of the %dº product or zero to finish sale! \n", count);
         scanf("%d", &id_product);
         if(exist_ID(connection, id_product) || id_product == 0){
             if(id_product == 0 ){
@@ -480,7 +474,6 @@ void sale_db(MYSQL *connection){
                         printf("Error deleting product: %s\n", mysql_error(connection));
                         return;
                     }
-                    
                     printf("Sale not made!\n");
                 }
                 else{
@@ -537,7 +530,6 @@ void report_aux(MYSQL *connection, int id_sale, float *end_total){
     *end_total += total;
     printf("\n %68s %-10.2f\n\n", "The total:", total);
     mysql_free_result(res);
-
 }
 
 void report_db(MYSQL *connection){
@@ -546,12 +538,12 @@ void report_db(MYSQL *connection){
     MYSQL_ROW row;
     char date[12];
     printf("\nType the date to view sales made on that day!\n"
-        "\nEnter in format mm-dd-yyyy or dd-mm-yyyy \n");
+        "\nEnter the date in mm-dd-yyyy or dd-mm-yyyy format. \n");
     scanf("%s", date);
 
     snprintf(query, sizeof(query),
-    "SELECT id_Sale, date_hora FROM Sale WHERE DATE(date_hora) = STR_TO_DATE('%s', '%%d-%%m-%%Y') "
-    "OR DATE(date_hora) = STR_TO_DATE('%s', '%%m-%%d-%%Y')", date, date);
+    "SELECT id_Sale, date_time FROM Sale WHERE DATE(date_time) = STR_TO_DATE('%s', '%%d-%%m-%%Y') "
+    "OR DATE(date_time) = STR_TO_DATE('%s', '%%m-%%d-%%Y')", date, date);
     execute_query(connection, query);
 
     res = mysql_store_result(connection);
@@ -608,7 +600,6 @@ void report_db(MYSQL *connection){
 }
 
 int main(){
-
     MYSQL *connection = connect_to_database();
     int proceed=1;
     int comando;

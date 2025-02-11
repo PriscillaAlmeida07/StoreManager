@@ -40,9 +40,9 @@ void create_db(MYSQL *connection) {
         "CREATE TABLE IF NOT EXISTS Products ("
         "id_Product INT NOT NULL AUTO_INCREMENT PRIMARY KEY, "
         "name VARCHAR(100), "
+        "purchase_price FLOAT, "
         "sale_price FLOAT, "
         "brand VARCHAR(100), "
-        "purchase_price FLOAT, "
         "quantity INT)"
     );
     execute_query(connection, query);
@@ -50,8 +50,7 @@ void create_db(MYSQL *connection) {
     snprintf(query, sizeof(query),
         "CREATE TABLE IF NOT EXISTS Sale ("
         "id_Sale INT NOT NULL AUTO_INCREMENT PRIMARY KEY, "
-        "date_hora DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP, "
-        "total FLOAT)"
+        "date_time DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP)"
     );
     execute_query(connection, query);
 
@@ -87,9 +86,9 @@ MYSQL* connect_to_database() {
     }
 
     // Check if the bank exists
-    if (bank_exists(connection)) {
+    if (bank_exists(connection))
         printf("The '%s' Database already exists!\n", DB_NAME);
-    } else {
+    else{
         printf("Database '%s' does NOT exist. Creating now...\n", DB_NAME);
         create_db(connection);
     }
