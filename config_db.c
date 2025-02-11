@@ -96,11 +96,11 @@ MYSQL* connect_to_database() {
 
     // Connecting to the created bank
     if (mysql_select_db(connection, DB_NAME) != 0) {
-        fprintf(stderr, "Error selecting database: %s\n", mysql_error(connection));
+        fprintf(stderr, "Error selecting database: %s \n", mysql_error(connection));
         mysql_close(connection);
         exit(EXIT_FAILURE);
     }
 
-    printf("Database connected successfully!\n");
+    printf("Database connected successfully! \n");
     return connection;
 }

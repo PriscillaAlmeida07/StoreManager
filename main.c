@@ -303,18 +303,18 @@ void find_name(MYSQL *connection, int id_product) {
 
     res = mysql_store_result(connection);
     if (!res) {
-        printf("Erro ao obter resultado da consulta\n");
+        printf("Error getting result \n");
         return;
     }
 
     row = mysql_fetch_row(res);
-    if (row && row[0]) {  // Verifica se há resultado válido
+    if (row && row[0])
         printf("%-10s %-*s"," ", 20, row[0]);
-    } else {
-        printf("Produto não encontrado\n");
-    }
 
-    mysql_free_result(res);  // Libera a memória do resultado
+    else 
+        printf("Product not found!\n");
+
+    mysql_free_result(res);  
 }
 
 
@@ -328,66 +328,60 @@ void find_quant(MYSQL *connection, int quant, int id_product, float *total) {
 
     res = mysql_store_result(connection);
     if (!res) {
-        printf("Erro ao obter resultado\n");
+        printf("Error getting result\n");
         return;
     }
 
     printf("%-*d", 20, quant);
     row = mysql_fetch_row(res);
     if (row && row[0]) {
-        float price = atof(row[0]);  // Converte o valor para float
-        *total += (price * quant);  // Atualiza o total
+        float price = atof(row[0]);  // Converts the value to float
+        *total += (price * quant);  
         printf("%-*.*f", 20, 2, price);
         printf("%-*.*f", 20, 2, (price * quant));
 
-    } else {
-        printf("Produto não encontrado ou sem preço\n");
-    }
+    } 
+    else 
+        printf("Product not found!\n");
 
     mysql_free_result(res);
 }
 
 
-void report(MYSQL *connection, int sale_id) {
+void receipt(MYSQL *connection, int sale_id) {
     char query[500];
     MYSQL_RES *res;
     MYSQL_ROW row;
 
-    snprintf(query, sizeof(query), 
-             "SELECT id_Product_aux, quantity FROM Sale_products WHERE id_Sale_aux = %d", sale_id);
+    snprintf(query, sizeof(query), "SELECT id_Product_aux, quantity FROM Sale_products WHERE id_Sale_aux = %d", sale_id);
     execute_query(connection, query);
 
     res = mysql_store_result(connection);
     if (!res) {
-        printf("Erro ao obter resultado da consulta\n");
+        printf("Error getting result\n");
         return;
     }
 
     int num_rows = mysql_num_rows(res);
     if (num_rows == 0) {
-        printf("Nenhum produto encontrado para esta venda\n");
+        printf("No products found for this sale\n");
         mysql_free_result(res);
         return;
     }
 
     float total = 0.00;
-
-
-   
     printf("%75s\n", "----------------------------------------------------------------");
-    
-    // Título centralizado
-    printf("%55s\n\n", "RECEIPT STORE MANAGER");
 
-    // Cabeçalho da tabela de produtos
+    printf("%55s\n\n", "STORE MANAGER RECEIPT");
+
     printf("%-10s %-20s%-20s%-20s%-20s\n", " ", "Product Name", "Quantity", "Unit Price", "Total");
 
 
     while ((row = mysql_fetch_row(res))) {
-        if (row[0] && row[1]) {  // Verifica se os valores não são NULL
+        if (row[0] && row[1]) {  
             int id_product = atoi(row[0]);
             int quant = atoi(row[1]);
-            find_name(connection, id_product);  // Supõe-se que esta função existe
+            find_name(connection, id_product); 
             find_quant(connection, quant, id_product, &total);
         }
         printf("\n");
@@ -399,24 +393,17 @@ void report(MYSQL *connection, int sale_id) {
     struct tm *tm_info;
     time(&current_time);
     tm_info = localtime(&current_time);
-    // Formata e imprime a data e a hora
-    // Imprime a data e a hora com alinhamento correto
     printf("\n%65s %02d/%02d/%04d", "Date:",
-        tm_info->tm_mday,     // Dia
-        tm_info->tm_mon + 1,  // Mês (base 0, por isso soma 1)
+        tm_info->tm_mday,     
+        tm_info->tm_mon + 1, 
         tm_info->tm_year + 1900);
 
- printf("\n%65s %02d:%02d:%02d\n", "Time:",
-        tm_info->tm_hour,     // Hora
-        tm_info->tm_min,      // Minuto
+    printf("\n%65s %02d:%02d:%02d\n", "Time:",
+        tm_info->tm_hour, 
+        tm_info->tm_min,    
         tm_info->tm_sec);
 
- // Linha inferior da nota fiscal
- printf("%75s\n\n", "----------------------------------------------------------------");
-
-
-
-
+    printf("%75s\n\n", "----------------------------------------------------------------");
 }
 
 
@@ -441,7 +428,7 @@ int update_qnt_stock(MYSQL *connection, int id_product, int quantity){
     }
     mysql_free_result(res);
     if(new_quant < 0){
-        printf("\nNo is possible registered sale, pois nao ha quantity suficiente de product in stock \n");
+        printf("\nIt is not possible to register this sale as there is not enough product in stock\n");
         return 0;
     }
     snprintf(query, sizeof(query), 
@@ -467,7 +454,6 @@ void sale_db(MYSQL *connection){
     printf("\nLet's a new sale!\n\n");
     mysql_query(connection, "INSERT INTO Sale () VALUES ()");
     sale_id = mysql_insert_id(connection);
-    printf("Nova sale criada com ID: %d\n", sale_id);
 
     while(1){
         printf("Type the ID of the %dº product or type 0 if there are no more products to be registered \n", count);
@@ -495,11 +481,11 @@ void sale_db(MYSQL *connection){
                         return;
                     }
                     
-                    printf("venda nao efetuada\n");
+                    printf("Sale not made!\n");
                 }
                 else{
                     printf("\nSucess! Sale registered\n");
-                    report(connection, sale_id);
+                    receipt(connection, sale_id);
                 }
                 return;
             }  
@@ -520,15 +506,106 @@ void sale_db(MYSQL *connection){
                 }
             }
         }
-        else{
+        else
             printf("Product ID not found\n\n");
-        }
     }       
 }
 
+void report_aux(MYSQL *connection, int id_sale, float *end_total){
+    char query[500];
+    float total;
+    MYSQL_RES *res;
+    MYSQL_ROW row;
 
+    snprintf(query, sizeof(query), "SELECT id_Product_aux, quantity FROM Sale_products WHERE id_Sale_aux = %d", id_sale);
+    execute_query(connection, query);
 
+    res = mysql_store_result(connection);
+    if (!res) {
+        printf("Error getting result\n");
+        return;
+    }
+    while ((row = mysql_fetch_row(res))) {
+        if (row[0] && row[1]) {  
+            int id_product = atoi(row[0]);
+            int quant = atoi(row[1]);
+            find_name(connection, id_product); 
+            find_quant(connection, quant, id_product, &total);
+        }
+        printf("\n");
+    }
+    *end_total += total;
+    printf("\n %68s %-10.2f\n\n", "The total:", total);
+    mysql_free_result(res);
 
+}
+
+void report_db(MYSQL *connection){
+    char query[500];
+    MYSQL_RES *res;
+    MYSQL_ROW row;
+    char date[12];
+    printf("\nType the date to view sales made on that day!\n"
+        "\nEnter in format mm-dd-yyyy or dd-mm-yyyy \n");
+    scanf("%s", date);
+
+    snprintf(query, sizeof(query),
+    "SELECT id_Sale, date_hora FROM Sale WHERE DATE(date_hora) = STR_TO_DATE('%s', '%%d-%%m-%%Y') "
+    "OR DATE(date_hora) = STR_TO_DATE('%s', '%%m-%%d-%%Y')", date, date);
+    execute_query(connection, query);
+
+    res = mysql_store_result(connection);
+    if (!res) {
+        printf("Error getting result\n");
+        return;
+    }
+
+    float end_total = 0.00;
+    printf("%75s\n", "----------------------------------------------------------------");
+
+    printf("%55s\n\n", "STORE MANAGER REPORT");
+
+    int num_rows = mysql_num_rows(res);
+    if (num_rows == 0) {
+        printf("\n%62s\n\n","There were no sales that day!");
+        printf("%75s\n\n", "----------------------------------------------------------------");
+        mysql_free_result(res);
+        return;
+    }
+
+    int count = 1;
+    while ((row = mysql_fetch_row(res))) {
+        if (row[0] && row[1]) {  
+            int id_sale= atoi(row[0]);
+            char date_time[22];
+            strcpy(date_time, row[1]);
+            printf("\n%10d° sale of the day", count);
+            printf("%52s \n", date_time);
+            printf("\n%-10s %-20s%-20s%-20s%-20s\n", " ", "Product Name", "Quantity", "Unit Price", "Total");
+            report_aux(connection, id_sale, &end_total);
+            count++;
+        }
+        printf("\n");
+    }
+    printf("\n %68s %-10.2f\n", "The final total:", end_total);
+    mysql_free_result(res);  
+
+    time_t current_time;
+    struct tm *tm_info;
+    time(&current_time);
+    tm_info = localtime(&current_time);
+    printf("\n%65s %02d/%02d/%04d", "Date:",
+        tm_info->tm_mday,     
+        tm_info->tm_mon + 1, 
+        tm_info->tm_year + 1900);
+
+    printf("\n%65s %02d:%02d:%02d\n", "Time:",
+        tm_info->tm_hour, 
+        tm_info->tm_min,    
+        tm_info->tm_sec);
+
+    printf("%75s\n\n", "----------------------------------------------------------------");
+}
 
 int main(){
 
@@ -537,13 +614,14 @@ int main(){
     int comando;
 
     while (proceed){
-        printf(" ----------------------------- STORE_MANAGER -----------------------------\n ");
+        printf("\n ----------------------------- STORE_MANAGER -----------------------------\n");
         printf("\n  [1] - Register a new product");
         printf("\n  [2] - Update a product");
         printf("\n  [3] - Find product");
         printf("\n  [4] - Delete product");
         printf("\n  [5] - Make a Sale");
-        printf("\n  [0] - Finalize and display the day's report\n"); //e exiba o relatorio do dia
+        printf("\n  [6] - Display the report of sales made in one day");
+        printf("\n  [0] - Finalize \n"); 
 
         scanf(" %d", &comando);
         switch (comando){
@@ -567,8 +645,12 @@ int main(){
                 sale_db(connection);
                 break;
 
+            case 6 :
+                report_db(connection);
+                break;
+
             case 0 :
-                proceed =0;
+                proceed = 0;
                 break;
             
             default :
