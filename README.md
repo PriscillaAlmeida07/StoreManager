@@ -1,19 +1,19 @@
 # STORE MANAGER
 
 ## project description
-O STORE MANAGER  é um sistema de gerenciamento de produtos e vendas, que permite o controle eficiente do estoque e das vendas comerciais efetuadas. 
+O STORE MANAGER  é um sistema de gerenciamento de produtos e vendas, que permite o controle eficiente do estoque e das vendas efetuadas. 
 Ele oferece as seguintes funcionalidades:
   - Cadastro, atualização e remoção de produtos.
   - Consulta de produtos cadastrados.
   - Registro de vendas com base no ID do produto.
   - Geração de relatórios simples via terminal.
     
-Além disso, o sistema permite realizar vendas de forma simples e rápida, utilizando o ID do produto e atualizando automaticamente o estoque. Para facilitar a análise do desempenho comercial, o sistema também conta com uma funcionalidade de relatórios de vendas, permitindo a visualização das transações realizadas e seu faturamento em um determinado dia.
+Com mais detalhes, o sistema permite realizar vendas de forma simples e rápida, utilizando o ID do produto e atualizando automaticamente o estoque. Para facilitar a análise do desempenho comercial, o sistema também conta com a funcionalidade de relatórios de vendas, permitindo a visualização das vendas realizadas e seu faturamento em um determinado dia.
 Com essa abordagem, o sistema garante um gerenciamento eficiente e organizado, proporcionando maior controle sobre produtos, vendas e estoque.
 
 
 
-Developed in C language and using the MySQL database.
+The system was developed in C programming language and using MySQL database.
 
 ## How to use the program?
 - *Necessary installations:*
@@ -39,7 +39,7 @@ Developed in C language and using the MySQL database.
 
     exit
     
-  - Clone o repositório, usando:
+  - Clone the repository, using:
     
     ``` bash
     git clone https://github.com/PriscillaAlmeida07/StoreManager.git
