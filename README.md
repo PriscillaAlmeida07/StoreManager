@@ -1,7 +1,10 @@
 # STORE MANAGER
 
-## project description
+## Project description
 O STORE MANAGER  é um sistema de gerenciamento de produtos e vendas, que permite o controle eficiente do estoque e das vendas efetuadas. 
+
+:warning: A aplicação funciona totalmente via linha de comando (CLI), sem interface gráfica, permitindo operações rápidas e diretas. :warning:
+
 Ele oferece as seguintes funcionalidades:
   - Cadastro, atualização e remoção de produtos.
   - Consulta de produtos cadastrados.
@@ -13,7 +16,7 @@ Com essa abordagem, o sistema garante um gerenciamento eficiente e organizado, p
 
 
 
-The system was developed in C programming language and using MySQL database.
+:rocket: The system was developed in C programming language and using MySQL database.
 
 ## How to use the program?
 - *Necessary installations:*
@@ -45,7 +48,7 @@ The system was developed in C programming language and using MySQL database.
     git clone https://github.com/PriscillaAlmeida07/StoreManager.git
     cd StoreManager
 
-- * Open the program:*  
+- *Open the program:*  
   - To run the program, use the code:
     
     ```bash
@@ -61,4 +64,4 @@ The system was developed in C programming language and using MySQL database.
 ## Information about the project
 This project was developed by:
 
-Priscilla Almeida: Computer Engineering Student - Universidade Estadual de Campinas (Unicamp)
+:woman_technologist: Priscilla Almeida: Computer Engineering Student - Universidade Estadual de Campinas (Unicamp)
