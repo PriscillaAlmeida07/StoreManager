@@ -4,7 +4,6 @@
 #include <mysql/mysql.h>
 #include <time.h>
 #include "config_db.h"
-#include "send_message.h"
 
 
 void insert_db(MYSQL *connection){
@@ -560,8 +559,8 @@ void report_aux(MYSQL *connection, int id_sale, float *gross_total, float *net_t
     }
     *gross_total += gross;
     *net_total += net;
-    printf("\n %85s %-10.2f", "The Gross Total:", gross);
-    printf("\n%84s %-10.2f\n\n", "The Net Total:", net);
+    printf("\n %85s %-10.2f", "Gross total income:", gross);
+    printf("\n%84s %-10.2f\n\n", "Net total income:", net);
     mysql_free_result(res);
 }
 
@@ -613,8 +612,8 @@ void report_db(MYSQL *connection){
         }
         printf("\n");
     }
-    printf("\n %85s %-10.2f", "The final Gross Total:", gross_total);
-    printf("\n%84s %-10.2f\n", "The final Net Total:", net_total);
+    printf("\n %81s %-10.2f", "Total gross income for that day:", gross_total);
+    printf("\n%80s %-10.2f\n", "Total net income for that day:", net_total);
     mysql_free_result(res);  
 
     time_t current_time;
