@@ -1,18 +1,18 @@
 # STORE MANAGER
 
 ## Project description
-O STORE MANAGER  é um sistema de gerenciamento de produtos e vendas, que permite o controle eficiente do estoque e das vendas efetuadas. 
+STORE MANAGER is a product and sales management system that allows efficient control of inventory and completed sales.
 
-:warning: A aplicação funciona totalmente via linha de comando (CLI), sem interface gráfica, permitindo operações rápidas e diretas. :warning:
+:warning: The application operates entirely via the command-line interface (CLI), with no graphical interface, enabling fast and direct operations.  :warning:
 
-Ele oferece as seguintes funcionalidades:
-  - Cadastro, atualização e remoção de produtos.
-  - Consulta de produtos cadastrados.
-  - Registro de vendas com base no ID do produto.
-  - Geração de relatórios simples via terminal.
+It offers the following features:
+  - Registration, updating, and removal of products.
+  - Consultation of registered products.
+  - Sales recording based on the product ID.
+  - Generation of simple reports via the terminal.
     
-Com mais detalhes, o sistema permite realizar vendas de forma simples e rápida, utilizando o ID do produto e atualizando automaticamente o estoque. Para facilitar a análise do desempenho comercial, o sistema também conta com a funcionalidade de relatórios de vendas, permitindo a visualização das vendas realizadas e seu faturamento em um determinado dia.
-Com essa abordagem, o sistema garante um gerenciamento eficiente e organizado, proporcionando maior controle sobre produtos, vendas e estoque.
+In more detail, the system allows for quick and easy sales processing using the product ID, automatically updating the inventory. To facilitate business performance analysis, the system also includes a sales report feature, enabling users to view completed sales and revenue (gross income and net income) for a specific day.
+With this approach, the system ensures efficient and organized management, providing greater control over products, sales, and inventory.
 
 
 
