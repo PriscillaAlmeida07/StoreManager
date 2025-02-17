@@ -56,9 +56,10 @@ With this approach, the system ensures efficient and organized management, provi
     
 - *In the STORE MANAGER program:*
   
-  - 1: When running (using ./main) you will need to enter the password previously created in Mysql;
-  - 2: The database will be configured by itself;
-  - 3: You can now use the program by entering the number corresponding to the option you want to perform.
+  - 1: Expand your computer screen fully for better visibility. Since the program will run in the terminal, this will ensure that the information is displayed correctly, avoiding any distortions in the display.
+  - 2: When running use (./main) you will need to enter the password previously created in Mysql;
+  - 3: The database will be configured by itself;
+  - 4: You can now use the program by entering the number corresponding to the option you want to perform.
    
 
 ## Information about the project
